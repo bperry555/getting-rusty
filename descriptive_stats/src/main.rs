@@ -23,21 +23,19 @@ fn my_median(numbers: &mut Vec<i32>) -> i32 {
     }
 }
 
-fn my_mode(numbers: &Vec<i32>) -> Vec<i32> {
 
-    let mut accumilator = HashMap::new();
-    for num in numbers {
-        let count = accumilator.entry(num).or_insert(0);
-        *count += 1;
-    }
+fn my_mode(numbers: &Vec<i32>) -> Option<i32> {
 
+    let mut accumilator = numbers.iter().fold(HashMap::new(),  |mut acc,  value| {
+        *acc.entry(value).or_insert(0) +=1;
+        acc
+    });
 
-    let max_count = accumilator.values().cloned().max().unwrap_or(0);
-
-    accumilator.into_iter()
-        .filter(|&(_, v)| v == max_count)
-        .map(|(&k, _)| k)
-        .collect()
+    let mode = accumilator
+        .into_iter()
+        .max_by_key(|&(_, count)| count)
+        .map(|(value,_)| *value);
+    return mode
 }
 
 fn main() {
