@@ -4,10 +4,10 @@ use std::collections::HashMap;
 
 fn main() {
     
-    let mut user_input = String::new();
+        let mut company_info: HashMap<&str, Vec<&str>> = HashMap::new();
+    loop {
     
-    loop{
-
+    let mut user_input = String::new();
         println!("Enter action to take: ");
         println!("1 ) Add employee to department list.");
         println!("2 ) List employee(s) by department." );
@@ -18,26 +18,28 @@ fn main() {
             .read_line(&mut user_input)
             .expect("Couldn't read line");
 
-        let user_input: u32 = match user_input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
+        let user_input: u32 = user_input.trim().parse()
+            .expect("Please type a number");
 
-        match user_input {
-            1 => add_employee(&user_input),
-            2 => ,
-            3 =>,
-            4 => break,
-            _ => break,
-        }
+        println!("user_input={}", user_input);
 
-    } //loop
+        let mut fields = String::new();
+
+        io::stdin()
+            .read_line(&mut fields)
+            .expect("couldn't read entries");
+
+        let (dept, name)  = fields.trim().split_once(' ').unwrap();
+        println!("Testing={:?} and Name={:?}", dept, name);
+        
+    
+       // company_info.entry(dept).or_insert(vec![name]);
+        let new_name = company_info.entry(dept)
+            .and_modify(|e| e.push(name.clone()))
+            .or_insert_with(|| vec![name]);
+
+        println!("Hashish test! = {:?}", company_info);
+    }
+
 } //main
 
-enum Company {
-    Dept_employee(HashMap::<String, vec![str]>),
-}
-impl Company {
-    fn add_employee(&self) {
-    }
-}
