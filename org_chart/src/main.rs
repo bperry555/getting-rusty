@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 fn main() {
     
-        let mut company_info: HashMap<&str, Vec<&str>> = HashMap::new();
+        let mut company_info: HashMap<String, Vec<String>> = HashMap::new();
     loop {
     
     let mut user_input = String::new();
@@ -21,25 +21,43 @@ fn main() {
         let user_input: u32 = user_input.trim().parse()
             .expect("Please type a number");
 
-        println!("user_input={}", user_input);
+        match user_input {
+            1 => add_employee(),
+            2 | 3 => {
+                println!("Good Job, Genuis. {}", (user_input));
+                         } 
+            4 | _ => break,
+        }
 
-        let mut fields = String::new();
+//        let mut fields = String::new();
 
-        io::stdin()
-            .read_line(&mut fields)
-            .expect("couldn't read entries");
+//        io::stdin()
+//            .read_line(&mut fields)
+//            .expect("couldn't read entries");
 
-        let (dept, name)  = fields.trim().split_once(' ').unwrap();
-        println!("Testing={:?} and Name={:?}", dept, name);
+//        let (dept, name)  = fields.trim().split_once(' ').unwrap();
+//        println!("Testing={:?} and Name={:?}", dept, name);
         
     
        // company_info.entry(dept).or_insert(vec![name]);
-        let new_name = company_info.entry(dept)
-            .and_modify(|e| e.push(name.clone()))
-            .or_insert_with(|| vec![name]);
+//        let new_name = company_info.entry(dept)
+//            .and_modify(|e| e.push(name.clone()))
+//            .or_insert_with(|| vec![name]);
 
-        println!("Hashish test! = {:?}", company_info);
-    }
+//        println!("Hashish test! = {:?}", company_info);
+    } //loop
 
 } //main
 
+fn add_employee() {
+    println!("Enter the department name followed by employee name you would like to enter \\n");
+    let mut data_entry = String::new();
+    io::stdin()
+        .read_line(&mut data_entry)
+        .expect("Need to enter: A department name, space, employee name");
+    
+    let (dept, name) = data_entry.trim().split_once(' ').unwrap();
+    
+    company_info.entry(String::from(dept)).or_insert_with();
+
+}
