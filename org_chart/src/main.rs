@@ -1,6 +1,12 @@
 use std::io;
 use std::collections::HashMap;
 
+#[derive(Debug)]
+enum Action {
+    Add,
+    Dept,
+    All,
+}
 
 fn main() {
     
@@ -21,14 +27,16 @@ fn main() {
         let user_input: u32 = user_input.trim().parse()
             .expect("Please type a number");
 
-        match user_input {
-            1 => add_employee(),
-            2 | 3 => {
+        let user_action = match user_input {
+            1 => Action::Add,
+            2 => Action::Dept,
+            3 => {
                 println!("Good Job, Genuis. {}", (user_input));
-                         } 
+                Action::All
+            } 
             4 | _ => break,
-        }
-
+        };
+        println!("new output = {:?}", user_action);
 //        let mut fields = String::new();
 
 //        io::stdin()
@@ -58,6 +66,7 @@ fn add_employee() {
     
     let (dept, name) = data_entry.trim().split_once(' ').unwrap();
     
-    company_info.entry(String::from(dept)).or_insert_with();
+//    company_info.entry(String::from(dept)).or_insert_with();
+
 
 }
