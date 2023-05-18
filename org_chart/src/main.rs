@@ -1,42 +1,24 @@
 use std::io;
 use std::collections::HashMap;
-
+use std::num::ParseIntError;
+#[warn(unused_variables)]
 #[derive(Debug)]
-enum Action {
-    Add,
-    Dept,
-    All,
+struct Adduser{
 }
-
 fn main() {
     
         let mut company_info: HashMap<String, Vec<String>> = HashMap::new();
+
     loop {
+
+        let choice = promt_user();
+
+        println!("WTF = {}", choice);
+
+        let choice: u32 = choice.trim().parse().expect("FINE");
+        println!("JUST MAYBE.. {}", choice);
     
-    let mut user_input = String::new();
-        println!("Enter action to take: ");
-        println!("1 ) Add employee to department list.");
-        println!("2 ) List employee(s) by department." );
-        println!("3 ) List all employee(s).");
-        println!("4 ) Quit.");
-        
-        io::stdin()
-            .read_line(&mut user_input)
-            .expect("Couldn't read line");
 
-        let user_input: u32 = user_input.trim().parse()
-            .expect("Please type a number");
-
-        let user_action = match user_input {
-            1 => Action::Add,
-            2 => Action::Dept,
-            3 => {
-                println!("Good Job, Genuis. {}", (user_input));
-                Action::All
-            } 
-            4 | _ => break,
-        };
-        println!("new output = {:?}", user_action);
 //        let mut fields = String::new();
 
 //        io::stdin()
@@ -56,6 +38,19 @@ fn main() {
     } //loop
 
 } //main
+
+fn promt_user() -> String { 
+    println!("Enter action to take: ");
+    println!("1 ) Add employee to department list.");
+    println!("2 ) List employee(s) by department." );
+    println!("3 ) List all employee(s).");
+    println!("4 ) Quit.");
+
+    let mut user_input = String::new();
+    io::stdin().read_line(&mut user_input);
+
+    return user_input
+}   
 
 fn add_employee() {
     println!("Enter the department name followed by employee name you would like to enter \\n");
