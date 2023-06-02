@@ -1,3 +1,52 @@
+use core::fmt;
+
+use crate::chunk_type::{self, ChunkType};
+
+#[derive(Debug)]
+pub struct Chunk {
+    chunk: Vec<u8>,
+}
+impl Chunk {
+    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+        todo!()
+    }
+
+    fn length(&sefl) -> u32 {
+        todo!()
+    }
+
+    fn chunk_type(&self) -> &ChunkType {
+        todo!()
+    }
+
+    fn data(&sefl) -> &[u8] {
+        todo!()
+    }
+
+    fn crc(&self) -> u32 {
+        todo!()
+    }
+
+    fn data_as_string(&self) -> Result<String> {
+        todo!()
+    }
+
+    fn as_bytes(&self) -> Vec<u8> {
+        todo!()
+    }
+}
+impl TryFrom<&[u8]> for Chunk {
+    fn try_from(value: &[u8]) -> Result<Self> {
+        todo!()
+    }
+}
+
+impl fmt::Display for Chunk {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
+
 #![allow(unused_variables)]
 #[cfg(test)]
 mod tests {
