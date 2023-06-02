@@ -13,8 +13,8 @@ impl TryFrom<[u8; 4]> for ChunkType {
     type Error = Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self> {
-        let lower = 65u8..=90;
-        let upper = 97u8..=122;
+        let lower = 65..=90 as u8;
+        let upper = 97..=122 as u8;
         for byte in value.iter() {
             if !(lower.contains(&byte)) && !(upper.contains(&byte)) {
                 return Err("Failed to convert to chuck".into());
@@ -50,23 +50,32 @@ impl ChunkType {
     }
     
    fn is_valid(&self) -> bool {
-       todo!()
+       if !self.is_reserved_bit_valid() {
+           return false
+       } else {
+           for byte in self.chunk.iter() {
+               if !byte.is_ascii() {
+                   return false
+               }
+           }
+       }
+       true
    }
 
    fn is_critical(&self) -> bool {
-       todo!()
+        return self.chunk[0] & 32 == 0;
    }
 
    fn is_public(&self) -> bool {
-        todo!()
+       return self.chunk[1] & 32 == 0;
    }
 
    fn is_reserved_bit_valid(&self) -> bool {
-       todo!()
+        return self.chunk[2] & 32 == 0;
    }
 
    fn is_safe_to_copy(&self) -> bool {
-       todo!()
+        return !self.chunk[3] & 32 == 0;
    }
 
 }
