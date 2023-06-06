@@ -4,29 +4,52 @@ use std::str::FromStr;
 
 use crate::{Error, Result};
 
-#[derive(Debug, Clone, PartialEq, Eq)] 
+#[derive(Debug, PartialEq)] 
 pub struct ChunkType {
-    chunk: [u8; 4],
+    bytes: [u8; 4],
+}
+
+impl ChunkType {
+   pub fn bytes(&self) -> [u8; 4] {
+       self.bytes
+    }
+    
+   fn is_valid(&self) -> bool {
+       self.bytes.iter().all(u8::is_ascii_alphabetic) && self.is_reserved_bit_valid()
+   }
+
+   fn is_critical(&self) -> bool {
+        return self.bytes[0] & 1 << 5 == 0; 
+   }
+
+   fn is_public(&self) -> bool {
+       return self.bytes[1] & 1 << 5 == 0;
+   }
+
+   fn is_reserved_bit_valid(&self) -> bool {
+        return self.bytes[2] & 1 << 5 == 0;
+   }
+
+   fn is_safe_to_copy(&self) -> bool {
+        return !self.bytes[3] & 1 << 5 == 0;
+   }
 }
 
 impl TryFrom<[u8; 4]> for ChunkType {
     type Error = Error;
 
     fn try_from(value: [u8; 4]) -> Result<Self> {
-        let lower = 65..=90 as u8;
-        let upper = 97..=122 as u8;
-        for byte in value.iter() {
-            if !(lower.contains(&byte)) && !(upper.contains(&byte)) {
-                return Err("Failed to convert to chuck".into());
-            }
+        if !value.iter().all(u8::is_ascii_alphabetic) {
+            return Err("Invalid chunk type.".into());
         }
-        Ok(ChunkType { chunk: value })
+
+        Ok(Self { bytes: value })
     }
 }
 
 impl fmt::Display for ChunkType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", String::from(std::str::from_utf8(&self.chunk).unwrap())
+        write!(f, "{}", String::from(std::str::from_utf8(&self.bytes).unwrap())
                )
     }
 }
@@ -36,49 +59,12 @@ impl FromStr for ChunkType {
 
     fn from_str(s: &str) -> Result<Self> {
         if s.len() != 4 {
-            return Err("oops".into())
+            return Err("Unable to convert {s} into a ChunkType".into());
         }
-        let bytes = s.as_bytes();
-        let array = [bytes[0], bytes[1], bytes[2], bytes[3]];
-        ChunkType::try_from(array)
+        <[_; 4]>::try_from(s.as_bytes())?.try_into()
     } 
 }
 
-impl ChunkType {
-   fn bytes(&self) -> [u8; 4] {
-       self.chunk
-    }
-    
-   fn is_valid(&self) -> bool {
-       if !self.is_reserved_bit_valid() {
-           return false
-       } else {
-           for byte in self.chunk.iter() {
-               if !byte.is_ascii() {
-                   return false
-               }
-           }
-       }
-       true
-   }
-
-   fn is_critical(&self) -> bool {
-        return self.chunk[0] & 32 == 0;
-   }
-
-   fn is_public(&self) -> bool {
-       return self.chunk[1] & 32 == 0;
-   }
-
-   fn is_reserved_bit_valid(&self) -> bool {
-        return self.chunk[2] & 32 == 0;
-   }
-
-   fn is_safe_to_copy(&self) -> bool {
-        return !self.chunk[3] & 32 == 0;
-   }
-
-}
 #[cfg(test)]
 mod tests {
     use super::*;
