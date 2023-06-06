@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 use crate::{Error, Result};
 
-#[derive(Debug, PartialEq)] 
+#[derive(Debug, Clone, PartialEq, Eq)] 
 pub struct ChunkType {
     bytes: [u8; 4],
 }
@@ -49,8 +49,7 @@ impl TryFrom<[u8; 4]> for ChunkType {
 
 impl fmt::Display for ChunkType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", String::from(std::str::from_utf8(&self.bytes).unwrap())
-               )
+        write!(f, "{}", String::from_utf8(self.bytes.try_into().unwrap()).unwrap())
     }
 }
 
