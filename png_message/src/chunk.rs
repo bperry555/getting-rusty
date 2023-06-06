@@ -1,53 +1,115 @@
-use core::fmt;
+use std::fmt::{ Display, Formatter };
+use crc::{Crc, CRC_32_ISO_HDLC };
+use crate::Error;
+use crate::{ chunk_type::ChunkType };
 
-use crate::chunk_type::{self, ChunkType};
+const CRC_32: Crc<u32> = Crc::<u32>::new(&CRC_32_ISO_HDLC);
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Chunk {
-    chunk: Vec<u8>,
+    chunk_type: ChunkType,
+    crc: u32,
+    data: Vec<u8>,
+    length: u32,
 }
 impl Chunk {
+
+
     fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
-        todo!()
+        let crc = Self::crc_checksum(&chunk_type, &data);
+        Chunk {
+            length: data.len() as u32,
+            crc, 
+            chunk_type,
+            data,
+        }
     }
 
-    fn length(&sefl) -> u32 {
-        todo!()
+    fn crc_checksum(chunk_type: &ChunkType, data: &Vec<u8>) -> u32 {
+
+        let crc_bytes: Vec<_> = chunk_type
+            .bytes()
+            .iter()
+            .chain(data.iter())
+            .copied()
+            .collect();
+
+        CRC_32.checksum(&crc_bytes)
+    }
+
+    fn length(&self) -> u32 {
+        self.length
     }
 
     fn chunk_type(&self) -> &ChunkType {
-        todo!()
+        &self.chunk_type
     }
 
-    fn data(&sefl) -> &[u8] {
-        todo!()
+    fn data(&self) -> &[u8] {
+        &self.data
     }
 
     fn crc(&self) -> u32 {
-        todo!()
+        self.crc
     }
 
-    fn data_as_string(&self) -> Result<String> {
-        todo!()
+    fn data_as_string(&self) -> Result<String, Error> {
+        Ok(String::from_utf8(self.data.clone()).unwrap())
     }
 
     fn as_bytes(&self) -> Vec<u8> {
-        todo!()
+        self.length
+            .to_be_bytes()
+            .iter()
+            .chain(self.chunk_type.bytes().iter())
+            .chain(self.data.iter())
+            .chain(self.crc.to_be_bytes().iter())
+            .copied()
+            .collect()
     }
 }
 impl TryFrom<&[u8]> for Chunk {
-    fn try_from(value: &[u8]) -> Result<Self> {
-        todo!()
+    type Error = Error;
+
+    fn try_from(value: &[u8]) -> Result<Self, Error> {
+        let mut iter = value.iter().cloned();
+
+        let len_bytes: [u8; 4] = iter.by_ref()
+            .take(4).collect::<Vec<u8>>().as_slice().try_into()?;
+        let length: u32 = u32::from_be_bytes(len_bytes);
+
+        let chunk_bytes: Vec<u8>= iter.by_ref()
+            .take(4).collect::<Vec<u8>>().as_slice().try_into()?;
+        let chunk_type = ChunkType::try_from(TryInto::<[u8;4]>::try_into(chunk_bytes.as_slice()).unwrap())?;
+
+        let data: Vec<u8> = iter.by_ref()
+            .take(length as usize).collect();
+
+        let crc_bytes = iter.by_ref()
+            .take(4).collect::<Vec<u8>>().as_slice().try_into()?;
+        let crc = u32::from_be_bytes(crc_bytes);
+        let crc_check = crc == Self::crc_checksum(&chunk_type, &data);
+
+        if !crc_check {
+            Err(Error::from("Invalid chunk"))
+        } else {
+        Ok(
+            Chunk {
+                length,
+                chunk_type,
+                data,
+                crc,
+            })
+        }
     }
 }
 
-impl fmt::Display for Chunk {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+impl Display for Chunk {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.data_as_string().unwrap())
     }
 }
 
-#![allow(unused_variables)]
 #[cfg(test)]
 mod tests {
     use super::*;
