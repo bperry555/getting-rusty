@@ -1,8 +1,8 @@
 use std::fmt::{ Display, Formatter };
+<<<<<<< HEAD
 use std::io::{BufReader, Read};
 use crc::{Crc, CRC_32_ISO_HDLC };
-use crate::Error;
-use crate::{ chunk_type::ChunkType };
+use crate::{Error, chunk_type::ChunkType };
 
 const CRC_32: Crc<u32> = Crc::<u32>::new(&CRC_32_ISO_HDLC);
 
@@ -14,7 +14,7 @@ pub struct Chunk {
     length: u32,
 }
 impl Chunk {
-    pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
+    fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         let crc = Self::crc_checksum(&chunk_type, &data);
         Chunk {
             length: data.len() as u32,
@@ -58,11 +58,23 @@ impl Chunk {
         Ok(Self::new(chunk_type, data))
     }
 
+    fn crc_checksum(chunk_type: &ChunkType, data: &Vec<u8>) -> u32 {
+
+        let crc_bytes: Vec<_> = chunk_type
+            .bytes()
+            .iter()
+            .chain(data.iter())
+            .copied()
+            .collect();
+
+        CRC_32.checksum(&crc_bytes)
+    }
+
     fn length(&self) -> u32 {
         self.length
     }
 
-    pub fn chunk_type(&self) -> &ChunkType {
+    fn chunk_type(&self) -> &ChunkType {
         &self.chunk_type
     }
 
@@ -74,11 +86,11 @@ impl Chunk {
         self.crc
     }
 
-    pub fn data_as_string(&self) -> Result<String, Error> {
+    fn data_as_string(&self) -> Result<String, Error> {
         Ok(String::from_utf8(self.data.clone()).unwrap())
     }
 
-    pub fn as_bytes(&self) -> Vec<u8> {
+    fn as_bytes(&self) -> Vec<u8> {
         self.length
             .to_be_bytes()
             .iter()
@@ -89,6 +101,7 @@ impl Chunk {
             .collect()
     }
 }
+
 impl TryFrom<&[u8]> for Chunk {
     type Error = Error;
 
